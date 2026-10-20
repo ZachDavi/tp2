@@ -8,14 +8,6 @@ class MessageBoard(QWidget):
         super().__init__()
         self.setWindowTitle("Message board")
         self.create_ui()
-        self.json_reading()
-
-    def json_reading(self):
-        self.data = json.load(open("C:\\Code\\tp2\\rules.json"))
-        print(self.data)
-
-        self.outline_names = list(self.data.keys())
-        self.outline_color = list(self.data.values())
 
     def create_ui(self):
         layout = QVBoxLayout(self)
@@ -35,51 +27,47 @@ class MessageBoard(QWidget):
         layout.addWidget(self.checkboxSort)
         layout.addWidget(self.bouton)
 
-    
+    def json_reading(self):
+        self.data = json.load(open(self.jsonPathEdit.text()))
+        print(self.data)
+
 
     def onStateChanged(self):
-        if self.checkboxSelect.isChecked():
-            liste_objet = cmds.ls(selection=True)
-            print("Selected")
-            print(liste_objet)
-        else:
-            print("tout")
-            liste_objet = []
-            for names in self.data:
-                liste_objet  += cmds.ls(f"{names}*")
-            print(liste_objet)
+        try:
+            self.json_reading()
+            
+        except:
+            print("Impossible de lire le JSON")
+            return
 
-        for obj in liste_objet:
-                    for names,color in self.data.items():
-                        if self.checkboxColor.isChecked():
-                            cmds.setAttr(f"{obj}.useOutlinerColor", True)
-                            cmds.setAttr(f"{obj}.outlinerColor", color[0], color[1], color[2])
-                            
-                        else:
-                            for names,k in self.data.items():
-                                for obj in cmds.ls(f"{names}*"):
-                                    cmds.setAttr(f"{obj}.useOutlinerColor", False)
-        
-        
-        
-        if self.checkboxSort.isChecked():
-            outliners = cmds.getPanel(type='outlinerPanel')
-            for i in outliners:
-                editor = cmds.outlinerPanel(i, query=True,outlinerEditor=True)
-                cmds.outlinerEditor(editor, edit=True, sortOrder='dagName')
+        cmds.undoInfo(openChunk=True)
+        for names,color in self.data.items():
+                
+            if self.checkboxSelect.isChecked():
+                liste_objet = cmds.ls(f"{names}*", selection=True)
+                print(liste_objet)
+            else:
+                liste_objet  = cmds.ls(f"{names}*")
 
-        else:
-            outliners = cmds.getPanel(type='outlinerPanel')
-            for i in outliners:
-                editor = cmds.outlinerPanel(i, query=True,outlinerEditor=True)
-                cmds.outlinerEditor(editor, edit=True, sortOrder='none')
+            for obj in liste_objet:
+                if self.checkboxColor.isChecked():
+                    cmds.setAttr(f"{obj}.useOutlinerColor", True)
+                    cmds.setAttr(f"{obj}.outlinerColor", color[0], color[1], color[2])
+                                    
+                else:
+                    cmds.setAttr(f"{obj}.useOutlinerColor", False)
+            
+            
+            
+                if self.checkboxSort.isChecked():
+                    liste_objet.sort()
+                    for i in liste_objet:
+                        cmds.reorder(i,back=True)
+        cmds.undoInfo(closeChunk=True)
+
+
+            
            
-
-
-    def on_click(self):
-        message = QMessageBox(self)
-        message.setWindowTitle("Affichage réponse")
-
 
 
  
