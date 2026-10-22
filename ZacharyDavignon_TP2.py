@@ -37,7 +37,6 @@ class MessageBoard(QWidget):
     # On lit le json avec le texte inséré dans la QLineEdit
     def json_reading(self):
         self.data = json.load(open(self.jsonPathEdit.text()))
-        print(self.data)
 
     #Logique derrière l'organisateur
     def onStateChanged(self):
